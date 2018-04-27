@@ -1,0 +1,335 @@
+                       ************************
+                       *                      *
+                       *   HGTFinder README   *
+                       *                      *
+                       ************************
+
+           **********************************************
+           *   Table of contents                        *
+           **********************************************
+           *   0 | License                              *
+           *   1 | About                                *
+           *   2 | Building and Making HGTFinder        *
+           *   3 | Prerequisites to Running HGTFinder   *
+           *   4 | Using Custom Files                   *
+           *   5 | Running HGTFinder                    *
+           *   6 | Output                               *
+           *   7 | Example Run                          *
+           *   8 | FAQ                                  *
+           *   9 | Changelog                            *
+           **********************************************
+
+0   |   License
+****|*************
+
+All softwares, scripts, and databases linked to HGTFinder are available only to non-profit research communities and non-commercial uses.  HGTFinder is provided "AS IS" and any express or implied warranties, including, but not limited to, to the implied warranty of fitness for a particular purpose, and any representations or warranties regarding the accuracy or utility of this product are disclaimed.  In no event shall Northern Illinois University, The biology department at Northern Illinois University, or Yin Lab, any of their directors, officers, employees, or agents be liable to you or any third party for direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, cost or damages related to your use of name, your procurement of substitute goods or services, your loss of data or profits, or business interruption), however caused and on any theory of liability, whether in contract, strict liability, or tort arising in any way out of the use of this product, even if the user(s) have been advised of the possibility of damage.
+
+By using this software, the user represent and warrant that they are a member of a non-profit research community; that the use of the product will be for non-commercial research purposes only and that the user agrees to the terms and conditions above.  
+
+1   |   About   
+****|***********
+
+HGTFinder is a tool that is used to predict horizontally transferred
+genes for a single genome based on a normalized bit score (called an 
+R-value, or R for short) and a taxonomic distance between the query 
+and subject genome.
+
+If you are not patient, please go directly to the end of this file for 
+some "Example Run" and check the input options and input file formats.
+
+
+2   |   Building and Making HGTFinder
+****|***********************************
+
+HGTFinder is designed to run on a Unix or Linux environment with 
+little to no altering of any code.  The program is written in C++ 
+using C++11 libraries, so an updated compiler that supports these
+libraries must also be installed (most OSes support this by default).
+
+A bash script is included to compile all the code and create HGTFinder 
+and all its associated tools.  It is named make.sh.  To run it, use 
+the following commands:
+
+  cd [DIRECTORY CONTAINING THIS README]
+  ./make.sh
+
+Replace "[DIRECTORY CONTAINING THIS README]" with the directory name
+that this README file is located in.
+
+
+3   |   Prerequisites to Running HGTFinder
+****|****************************************
+
+R is used to run basic statistical computations on X values, so it 
+is required to run HGTFinder.  Additionally, you'll need to install
+the "qvalue" and "hash" packages in R.
+
+In order to run HGTFinder you'll need a few files and some data for 
+it to use.  For the genome you'll be running HGTFinder on, you'll 
+need the following files:
+    Blast file: blast results (tab delimited, use -outfmt 6 when 
+      running blast) from a blast against some database.  Keep in 
+      mind that you'll also need some information about this database
+      as well (default is NCBI nr, see below for nr.tax file description).  
+    Self blast file: blast results (tab delimited) from a blast 
+      against itself.  
+
+There are some files required to build the taxonomic tree.  They are 
+supplied by this package, though if you are dealing with a query or
+subject that isn't on our tree, you may have to add it in manually
+into our own trees.  We provide the names and nodes files downloaded 
+from NCBI (ftp.ncbi.nih.gov:/pub/taxonomy):
+    names.dmp: A file delimited by "[tab]|[tab]" where the first 
+      column is the tax id and the second is the name of the genome.
+      the third column is a descriptor, it's unused by HGTFinder
+    nodes.dmp: A file delimited the same way as the names.dmp file.
+      The first column is a tax id, the second is its parent (as a
+      tax id).  The third column is its rank.  The rest of the data
+      is unused (the third column isn't either) and mainly composes 
+      of numerical data.  
+
+The final file that is required is based on the database that you
+decide to blast against.  Since we use a proprietary format of 
+database, you'll need to use our included DBFormatter tool to 
+format your database.  The input file for this DBFormatter tool is
+simply a multi-lined file where each line has a protein ID (from
+the database) and a taxonomic ID associated with the protein ID.  We 
+provide an example of such a file:
+    nr.tax
+
+If you decide to use your own custom database, you'll be required
+to make your own protein ID to tax ID file (2 column, tab delimited
+where the first column is protein ID and second tax ID).  
+Additionally, if the tax ID of any genome is not in the names or 
+nodes file, you'll have to append to those as well (do NOT replace
+them, however!).  You'll also be required to, as stated above, run 
+the DBFormatter tool (See section 4 for more information).
+
+
+4   |   Using Custom Files
+****|************************
+
+HGTFinder is designed to be compatible with custom blast databases.
+However, you must first format the database to work properly with it.
+Steps to do this are below:
+  1) Create a tab delimited file that has a protein ID and taxonomic 
+     ID on each line separated by a tab (also described above).  Use
+     our nr.tax as an example.
+  2) Run the DBFormatter tool from this directory using the following
+     command:
+       ./DBFormater -i [protein tax file] -o [output].hdb
+     Replace "[protein tax file]" with the file name of the file you 
+     created in step 1 and "[output]" with the name of the name you 
+     want to give the database.
+
+HGTFinder, as seen in part (3) allows the use of custom databases
+and taxonomic trees.  The file named "fileLocations" allows you to
+tell HGTFinder the locations of these custom files.  It is a 
+2-column tab delimited file.  Edit either names.dmp, nodes.dmp, or 
+nr.hdb to specify the location of your custom files if you choose to
+use them (those files should be in the same directory as HGTFinder).
+
+The FindPercentile.R script should not be changed in this file.  It
+is part of the inner workings of the HGTFinder script.  
+
+
+5   |   Running HGTFinder
+****|***********************
+
+There are many options in HGTFinder, some options require other
+options to be used as well.  Option dependence (what options must be
+supplied together) is below the options list.
+
+Option dependence.  Some options are required or go together with
+other options.  Below are lists of options that have to be used in
+conjunction with one another.  We'll start with the required options
+for EVERY run.  Note that square brackets '[]' imply something that
+is needed while angled brackets '<>' imply something that is optional
+
+Required Options
+    [-d file_name] [-s file_name] [-t tax_id] [-r rvals]
+
+Required Options for clustering
+    [<-S stats_file> <-g GFF3_file>]* [<-p p_value> <-q q_value>]* [-h hole_size]
+    *One of the two enclosed options us required
+
+These arguments correspond to the following options below, 
+respectively:
+    [DB Blast]          -d 
+    [Self Blast]        -s 
+    [taxid]             -t 
+    [out prefix]        -o 
+    <gff>               -g 
+    <cluster hole size> -h
+    <Stats file*>       -S
+    <p-value cutoff>    -p
+    <q-value cutoff>    -q
+
+    *Generated by HGTFinder
+
+A full list of options and their descriptions are below.
+
+-d | --dbBlast
+    This option is followed by the file name of the Blast output 
+    against the large database.
+
+-s | --selfBlast
+    This option is followed by the file name of the Blast output 
+    between the query and itself.  
+
+-t | --tax | --taxID
+    This option is followed by the tax ID of the query genome.
+
+-r | --rVals | --rVal
+    This option is followed by a comma delimited list of numbers
+    between 0 and 1.  The represent R-value cutoffs to use while
+    HGTFinder is running.  HGTFinder will output three files for
+    each cutoff selected.
+
+-o | --out
+    This option is followed by a file name prefix to give to all the
+    output files of HGTFinder.  The default output prefix is "out".  
+
+-g | --gff | --gffFile
+    This option is followed by a name of a GFF3 formatted file.  The
+    IDs and names are expected to match those in the blast (or stats)
+    file provided.  This option is ONLY used for clustering.
+
+-S | -a | --stats
+    This option is followed by a name of a stats file (generated by
+    HGT-Finder).  It allows you to bypass the computation of the 
+    stat files if you've run HGT-Finder on a dataset before.  This 
+    option is ONLY used for clustering.
+
+-h | -holeSize
+    This option is followed by an integer > 0.  It determines the 
+    largest size of non-HGT genes allowed between every pair of HGT
+    genes within a gene cluster.  See example below:
+
+    Say we have the following genes and HGT (denoted by X)
+      G1 G2 G3 G4 G5 G6 G7 G8 G9 G10 G11 G12 G13
+         X  X        X           X   X       X
+    If the hole size was set to 2, then the following clusters would
+    result:
+      [G2-G6] and [G10-G13] 
+    If the hole size was set to 3, the the following clusters would
+    result:
+      [G2-G13]
+
+-p | --pval
+    This option is followed by a floating point (decimal) value > 0.
+    It determines what p-value will be used to determine HGT.  All
+    genes with p-value < the given value will be determined to be HGT
+
+-q | --qval
+    This option is followed by a floating point (decimal) value > 0.
+    It determines what q-value will be used to determine HGT.  All
+    genes with q-value < the given value will be determined to be HGT
+
+
+6   |   Output
+****|************
+
+HGTFinder will output 3 files for each cutoff selected, they will be
+in the form of:
+  [Output].[RVal].dist
+    This file contains the following columns:
+        query gene
+        x (transfer index)
+        k (number of hit genomes)
+        subject
+        subject tax id
+        D (distance between query and subject)
+        R (normalized bit score)
+        N (number of taxonomic nodes between common node and root)
+        query lineage (with * denoting the common node)
+        subject lineage
+    The main value from this file would be the transfer index, X.
+    Essentially, a higher X relates to a better chance of horizontal
+    gene transfer.  X is not guaranteed to be comparable across 
+    multiple genomes.
+  [Output].[RVal].dist.cut
+    This file is used for the "FindPercentile.R" script.  It contains
+    a 2-column, tab-delimited file with each line containing a 
+    protein ID (from the blast file) and an X value for that protein
+    ID.  
+  [Output].[RVal].dist.stats
+    This is a 4-column, tab-delimited file that contains the 
+    following information:
+        gene name
+        x value
+        p value
+        q value
+"[Output]" is the output you specified with the "-o" option
+(see section 5) and "[RVal]" is the R cutoff used for the given file
+output specified in the "-r" option (see section 5).  
+
+Additionally, the standard output stream is utilized to display 
+warnings.  You can redirect the standard output to a file using 
+'> [file]' at the end of a command to mute this (and save it in a 
+file).
+
+Also, the error stream is utilized mainly to display progress 
+information while the program is running.  You can mute this using
+'2> [file]' at the end of the command and save it to a file.
+
+7   |   Example Run
+****|*****************
+
+To run the sample test from the terminal, run:
+    ./HGTFinder -d Sample_Test/Aspfl1.blast.out -s Sample_Test/Aspfl1.blast.self -t 332952 -o Sample_Test/TestOut/HGTOut -r 0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9
+
+To run, muting warnings:
+    ./HGTFinder -d Sample_Test/Aspfl1.blast.out -s Sample_Test/Aspfl1.blast.self -t 332952 -o Sample_Test/TestOut/HGTOut -r 0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9 > [warning file]
+
+    Insert a file name in place of "[warning file]"
+
+8   |   FAQ
+****|*********
+
+Common Errors
+  "Error in q$qvalues : $ operator is invalid for atomic vectors"
+    Known causes:
+    -Cause: Blasts on the DB and self were run with different 
+     options.
+       Solution: Rerun the blast(s) with matching options.
+    -Cause: Self blast contains multiple hits for the same query 
+     sequence (where the query = subject) that are subsequences of 
+     the query.
+       Solution: This is an issue with blast, the only real solution
+       would be to remove this sequence from the DB blast file (this
+       sequence will not be able to be predicted for HGT).
+
+  Empty pvals file
+    Known causes:
+      -Cause: Bit scores are not high enough for non-self, subject 
+       hits in DB blast for many (or all) queries.
+         Solution: Lower R cutoff.
+
+9   |   Changelog
+****|***************
+
+2015-28-10
+  Initial, public release
+
+2015-29-10
+  Updated README file
+    -Added new clustering options
+    -Removed "Upcoming changes" section
+    -Added "FAQ"
+    -Added "Changelog" section
+  Updated Sample_Test folder (thanks Guy!)
+    -Removed symbolic links
+    -Included actual blast files
+  Bug fixes
+    -Outputted warnings about improper R values due to improperly done
+     blast outputs (thanks Cedric!)
+    -Fixed floating point precision
+    -Fixed exponent bit score bug (thanks Cedric!)
+
+2016-13-03
+  Updated README file
+    -Added licensing information for HGTFinder (thanks Sebastien!)
+    -Fixed typos in README (thanks Sebastien!)
+    -Added "hash" R package prerequisite (thanks Sebastien!)
+
