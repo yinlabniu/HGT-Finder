@@ -79,7 +79,7 @@ supplied by this package, though if you are dealing with a query or
 subject that isn't on our tree, you may have to add it in manually
 into our own trees.  We provide the names and nodes files downloaded 
 from NCBI (ftp.ncbi.nih.gov:/pub/taxonomy) which are available at 
-cys.bios.niu.edu/HGTFinder:
+bcb.unl.edu/HGTFinder:
     names.dmp: A file delimited by "[tab]|[tab]" where the first 
       column is the tax id and the second is the name of the genome.
       the third column is a descriptor, it's unused by HGTFinder
@@ -95,7 +95,7 @@ database, you'll need to use our included DBFormatter tool to
 format your database.  The input file for this DBFormatter tool is
 simply a multi-lined file where each line has a protein ID (from
 the database) and a taxonomic ID associated with the protein ID.  We 
-provide an example of such a file, available at cys.bios.niu.edu/HGTFinder:
+provide an example of such a file, available at bcb.unl.edu/HGTFinder:
     nr.tax
 
 If you decide to use your own custom database, you'll be required
@@ -277,7 +277,7 @@ information while the program is running.  You can mute this using
 7   |   Example Run
 ****|*****************
 
-The Sample_Test folder is available for download at cys.bios.niu.edu/HGTFinder
+The Sample_Test folder is available for download at bcb.unl.edu/HGTFinder
 
 To run the sample test from the terminal, run:
     ./HGTFinder -d Sample_Test/Aspfl1.blast.out -s Sample_Test/Aspfl1.blast.self -t 332952 -o Sample_Test/TestOut/HGTOut -r 0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9
