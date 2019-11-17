@@ -15,8 +15,11 @@ using std::map; using std::unordered_map;
 using std::vector; using std::pair;
 using std::string;
 
-unsigned int hashString( unsigned int d, string str );
+typedef pair<char*, int> ProteinToTaxId;
+typedef vector<const ProteinToTaxId*> ProteinToTaxIdBucket;
+
+unsigned int hashString( unsigned int d, const char* str );
 unsigned int foldHash(unsigned int hash, int size);
 int nlz10b(unsigned x);
-pair<vector<int>,vector<int>> CreateMinimalPerfectHash( unordered_map<string,int> dict );
+pair<vector<int>,vector<int>> CreateMinimalPerfectHash( const vector<ProteinToTaxId>& dict );
 void printHelp();
