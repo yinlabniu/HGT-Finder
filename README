@@ -22,9 +22,22 @@
 0   |   License
 ****|*************
 
+Copyright <2015-2022> <Yanbin Yin>
+
 All softwares, scripts, and databases linked to HGTFinder are available only to non-profit research communities and non-commercial uses.  HGTFinder is provided "AS IS" and any express or implied warranties, including, but not limited to, to the implied warranty of fitness for a particular purpose, and any representations or warranties regarding the accuracy or utility of this product are disclaimed.  In no event shall Northern Illinois University, The biology department at Northern Illinois University, or Yin Lab, any of their directors, officers, employees, or agents be liable to you or any third party for direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, cost or damages related to your use of name, your procurement of substitute goods or services, your loss of data or profits, or business interruption), however caused and on any theory of liability, whether in contract, strict liability, or tort arising in any way out of the use of this product, even if the user(s) have been advised of the possibility of damage.
 
 By using this software, the user represent and warrant that they are a member of a non-profit research community; that the use of the product will be for non-commercial research purposes only and that the user agrees to the terms and conditions above.  
+
+0.1   |  Changed to MIT License May 26, 2023
+
+Copyright <2023-> <Yanbin Yin>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 
 1   |   About   
 ****|***********
