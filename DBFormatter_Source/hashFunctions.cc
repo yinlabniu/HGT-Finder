@@ -3,11 +3,11 @@
 
 // Calculates a distinct hash function for a given string. Each value of the
 // integer d results in a different hash value.
-unsigned int hashString( unsigned int d, string str ){
+unsigned int hashString( unsigned int d, const char* str ){
     if (d == 0) d = 0x01000193;
 
     // Use the FNV algorithm
-    for(int i = 0; i < str.size(); i++){
+    for(int i = 0; str[i] != 0; i++){
         d = ( (d * 0x01000193) ^ str[i] ) & 0xffffffff;
     }
     return d;
@@ -43,11 +43,11 @@ int nlz10b(unsigned x) {
 }
 
 
-pair<vector<int>,vector<int>> CreateMinimalPerfectHash( unordered_map<string,int> dict ){
+pair<vector<int>,vector<int>> CreateMinimalPerfectHash( const vector<ProteinToTaxId>& dict ){
     int size = dict.size();
 
     // Step 1: Place all of the keys into buckets
-    vector<vector<string>> buckets;
+    vector<ProteinToTaxIdBucket> buckets;
     buckets.resize(size);
     vector<int> G;
     G.resize(size);
@@ -58,17 +58,17 @@ pair<vector<int>,vector<int>> CreateMinimalPerfectHash( unordered_map<string,int
     fill(filled.begin(),filled.end(),0);
 
     for(auto itr = dict.begin(); itr != dict.end(); itr++){
-        buckets[hashString(0, itr->first) % size].push_back( itr->first );
+        buckets[hashString(0, itr->first) % size].push_back( &*itr );
     }
 
     // Step 2: Sort the buckets and process the ones with the most items first.
-    sort( buckets.begin(), buckets.end(), [](const std::vector<string>& a, const std::vector<string>& b) {
+    sort( buckets.begin(), buckets.end(), [](const ProteinToTaxIdBucket& a, const ProteinToTaxIdBucket& b) {
         return a.size() > b.size();
     });
 
     int b = 0;
     for(; b < size; b++){
-        vector<string>& bucket = buckets[b];
+        ProteinToTaxIdBucket& bucket = buckets[b];
         if (bucket.size() <= 1) break;
 
         int d = 1;
@@ -78,7 +78,7 @@ pair<vector<int>,vector<int>> CreateMinimalPerfectHash( unordered_map<string,int
         // Repeatedly try different values of d until we find a hash function
         // that places all items in the bucket into free slots
         while( item < bucket.size()){
-            int slot = hashString( d, bucket[item] ) % size;
+            int slot = hashString( d, bucket[item]->first ) % size;
             if (filled[slot] == true || find(slots.begin(),slots.end(),slot) != slots.end()){
                 d += 1;
                 item = 0;
@@ -90,9 +90,9 @@ pair<vector<int>,vector<int>> CreateMinimalPerfectHash( unordered_map<string,int
 	    }
         }
 
-        G[hashString(0, bucket[0]) % size] = d;
+        G[hashString(0, bucket[0]->first) % size] = d;
         for(int i = 0; i < bucket.size(); i++){
-            values[slots[i]] = dict[bucket[i]];
+            values[slots[i]] = bucket[i]->second;
 	    filled[slots[i]] = true;
 	}
     }
@@ -106,14 +106,14 @@ pair<vector<int>,vector<int>> CreateMinimalPerfectHash( unordered_map<string,int
     }
 
     for (; b < size; b++ ){
-        vector<string>& bucket = buckets[b];
+        ProteinToTaxIdBucket& bucket = buckets[b];
         if( bucket.size() == 0) break;
         int slot = freelist.back();
 	freelist.pop_back();
         // We subtract one to ensure it's negative even if the zeroeth slot was
         // used.
-        G[hashString(0, bucket[0]) % size] = -slot-1;
-        values[slot] = dict[bucket[0]];
+        G[hashString(0, bucket[0]->first) % size] = -slot-1;
+        values[slot] = bucket[0]->second;
     }
     return make_pair(G, values);
 }

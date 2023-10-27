@@ -24,14 +24,16 @@ int main(int argc, char* argv[]){
 		printHelp();
 	}
 
-	unordered_map<string,int> dict;
+	vector<ProteinToTaxId> dict;
 	int tax = 0;
 	ifstream file; file.open(arguments["-i"],ios::in);
 	string key;
 	char zeroes = 32;
 	while(file >> key){
 	    file >> tax;
-	    dict[key] = tax;
+	    char* lightweightStr = new char[key.length() + 1];
+	    std::strcpy(lightweightStr, key.c_str());
+	    dict.push_back(std::make_pair(lightweightStr, tax));
 	    int lZ = nlz10b(tax);
             if(lZ < zeroes) zeroes = lZ;
 	}
@@ -42,7 +44,10 @@ int main(int argc, char* argv[]){
 	}
 
 	pair<vector<int>,vector<int>> result = CreateMinimalPerfectHash( dict );
-	file.close();
+
+	for (auto itr = dict.begin(); itr != dict.end(); itr++) {
+		free(itr->first);
+	}
 
 	string outFile;
 	if(arguments["-o"] != ""){outFile = arguments["-o"];}
